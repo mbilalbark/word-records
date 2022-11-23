@@ -3,10 +3,26 @@
     "description": "Word dictinary",
     "version": "0.1.0",
     "manifest_version": 3,
-    "background": {
-        "service_worker": "background.js"
-      },
     "action": {
       "default_popup": "popup.html"
-    }
+    },
+    "permissions": [
+      "nativeMessaging"
+    ],
+    "host_permissions": [
+        "*://*/*"
+    ],
+    "background": {
+        "service_worker": "service-worker.js"
+    },
+    "content_scripts": [
+      {
+        "js": ["service.js"],
+        "matches": ["https://github.com/*"]
+      },
+      {
+        "js": ["db.js"],
+        "matches": ["https://github.com/*"]
+      }
+    ]
   }

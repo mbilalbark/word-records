@@ -2,7 +2,6 @@
 let db = null;
 function create_database() {
     const request = window.indexedDB.open('WordDB');
-
     request.onerror = function (event) {
         console.log("Problem opening DB.");
     }
@@ -30,32 +29,36 @@ function create_database() {
     }
 }
 
-
-function insert_records(records) {
-    if (db) {
-        const insert_transaction = db.transaction("words", "readwrite");
-        const objectStore = insert_transaction.objectStore("words");
-
-        return new Promise((resolve, reject) => {
-            insert_transaction.oncomplete = function () {
-                console.log("ALL INSERT TRANSACTIONS COMPLETE.");
-                resolve(true);
-            }
-
-            insert_transaction.onerror = function () {
-                console.log("PROBLEM INSERTING RECORDS.")
-                resolve(false);
-            }
-
-            records.forEach(person => {
-                let request = objectStore.add(person);
-
-                request.onsuccess = function () {
-                    console.log("Added: ", person);
-                }
-            });
-        });
+function insert_records(record) {
+    if (db == null) {
+        create_database();
     }
+
+    const insert_transaction = db.transaction("words", "readwrite");
+    const objectStore = insert_transaction.objectStore("words");
+
+    return new Promise((resolve, reject) => {
+        insert_transaction.oncomplete = function () {
+            console.log("ALL INSERT TRANSACTIONS COMPLETE.");
+            resolve(true);
+        }
+
+        insert_transaction.onerror = function () {
+            console.log("PROBLEM INSERTING RECORDS.")
+            resolve(false);
+        }
+        let request = objectStore.add(record);
+        request.onsuccess = function () {
+            console.log("Added: ", record);
+        }
+        // records.forEach(person => {
+        //     let request = objectStore.add(person);
+
+        //     request.onsuccess = function () {
+        //         console.log("Added: ", person);
+        //     }
+        // });
+    });
 }
 
 function get_record(email) {
@@ -124,46 +127,6 @@ function delete_record(email) {
     }
 }
 
-chrome.runtime.onMessage.addListener((request, sender, senderResponse) => {
 
-    if(request.message == "insert")
-    {
-        console.log("insert")
-        let proccess = insert_records(request.payload)
-        proccess.then(res =>{
-            chrome.runtime.sendMessage({
-                message:"insert_success",
-                payload:res
-            })
-        })
-    }
-    else if(request.message == "get"){
-        let proccess = get_record(request.payload);
-        proccess.then(res => {
-            chrome,runtime.sendMessage({
-                message:"get_success",
-                payload:res
-            })
-        })
-    }
-    else if(request.message == "update"){
-        let proccess = get_record(request.payload);
-        proccess.then(res => {
-            chrome,runtime.sendMessage({
-                message:"update_success",
-                payload:res
-            })
-        })
-    }
-    else if(request.message == "delete"){
-        let proccess = get_record(request.payload);
-        proccess.then(res => {
-            chrome,runtime.sendMessage({
-                message:"delete_success",
-                payload:res
-            })
-        })
-    }
-})
 
-create_database();
+
